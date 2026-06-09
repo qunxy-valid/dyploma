@@ -22,6 +22,13 @@ def test_health_check(client: TestClient) -> None:
     }
 
 
+def test_dashboard_page_available(client: TestClient) -> None:
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "Python DevOps Lifecycle" in response.text
+
+
 def test_create_and_list_quality_issue(client: TestClient) -> None:
     payload = {
         "title": "Missing regression test for authentication",
@@ -81,3 +88,34 @@ def test_resolve_unknown_issue_returns_404(client: TestClient) -> None:
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Quality issue not found"}
+
+
+def test_seed_demo_issues(client: TestClient) -> None:
+    seed_response = client.post("/demo/seed")
+    summary_response = client.get("/quality-summary")
+
+    assert seed_response.status_code == 200
+    assert len(seed_response.json()) == 3
+    assert summary_response.json() == {
+        "total_issues": 3,
+        "open_issues": 2,
+        "resolved_issues": 1,
+        "reliability_score": 60.0,
+    }
+
+
+def test_demo_pipeline_report(client: TestClient) -> None:
+    response = client.get("/demo/pipeline")
+    data = response.json()
+
+    assert response.status_code == 200
+    assert data["passed"] is True
+    assert data["coverage_percent"] == 96.0
+    assert "def test_" in data["sample_test_code"]
+    assert [stage["command"] for stage in data["stages"]] == [
+        "ruff format --check .",
+        "ruff check .",
+        "mypy app",
+        "pytest",
+        "docker build -t python-devops-lifecycle .",
+    ]

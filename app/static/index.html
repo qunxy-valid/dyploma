@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Python DevOps Lifecycle</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">CI</div>
+        <div>
+          <h1>Python DevOps Lifecycle</h1>
+          <p>FastAPI · pytest · ruff · mypy · Docker · GitHub Actions</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="button secondary" id="seedButton" type="button">
+          Демо-дані
+        </button>
+        <button class="button primary" id="runPipelineButton" type="button">
+          Запустити pipeline
+        </button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="metrics" aria-label="Показники якості">
+        <article class="metric">
+          <span class="metric-label">Надійність</span>
+          <strong id="reliabilityScore">0%</strong>
+        </article>
+        <article class="metric">
+          <span class="metric-label">Відкриті дефекти</span>
+          <strong id="openIssues">0</strong>
+        </article>
+        <article class="metric">
+          <span class="metric-label">Закриті дефекти</span>
+          <strong id="resolvedIssues">0</strong>
+        </article>
+        <article class="metric">
+          <span class="metric-label">Покриття тестами</span>
+          <strong id="coverageValue">0%</strong>
+        </article>
+      </section>
+
+      <section class="panel pipeline-panel">
+        <div class="panel-header">
+          <div>
+            <h2>CI/CD pipeline</h2>
+            <p id="pipelineMeta">main · demo-7f3a2c1</p>
+          </div>
+          <span class="status-pill" id="pipelineStatus">Очікує запуску</span>
+        </div>
+        <canvas id="pipelineCanvas" width="1000" height="260"></canvas>
+        <div class="stage-list" id="stageList"></div>
+      </section>
+
+      <section class="workbench">
+        <section class="panel issues-panel">
+          <div class="panel-header">
+            <h2>Дефекти якості</h2>
+            <span class="count-pill" id="issueCount">0</span>
+          </div>
+
+          <form class="issue-form" id="issueForm">
+            <input
+              id="issueTitle"
+              name="title"
+              type="text"
+              minlength="3"
+              maxlength="120"
+              placeholder="Назва дефекту"
+              required
+            />
+            <input
+              id="issueService"
+              name="service"
+              type="text"
+              minlength="2"
+              maxlength="60"
+              placeholder="Сервіс"
+              value="core"
+              required
+            />
+            <select id="issueSeverity" name="severity" aria-label="Рівень критичності">
+              <option value="low">low</option>
+              <option value="medium" selected>medium</option>
+              <option value="high">high</option>
+              <option value="critical">critical</option>
+            </select>
+            <button class="button primary" type="submit">Додати</button>
+          </form>
+
+          <div class="issue-list" id="issueList"></div>
+        </section>
+
+        <section class="panel code-panel">
+          <div class="panel-header">
+            <h2>Тестовий код</h2>
+            <div class="segmented" role="tablist" aria-label="Вибір коду">
+              <button class="segment active" data-code-tab="sample_code" type="button">
+                Код
+              </button>
+              <button class="segment" data-code-tab="sample_test_code" type="button">
+                Тести
+              </button>
+            </div>
+          </div>
+          <pre><code id="codeBlock"></code></pre>
+        </section>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

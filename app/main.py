@@ -1,9 +1,20 @@
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
-from app.schemas import QualityIssue, QualityIssueCreate, QualitySummary
-from app.services import IssueRepository
+from app.schemas import (
+    DemoPipelineReport,
+    QualityIssue,
+    QualityIssueCreate,
+    QualitySummary,
+)
+from app.services import IssueRepository, build_demo_pipeline_report
+
+APP_DIR = Path(__file__).resolve().parent
+STATIC_DIR = APP_DIR / "static"
 
 
 def create_app(repository: IssueRepository | None = None) -> FastAPI:
@@ -13,9 +24,14 @@ def create_app(repository: IssueRepository | None = None) -> FastAPI:
         version="1.0.0",
     )
     issue_repository = repository or IssueRepository()
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
     def get_repository() -> IssueRepository:
         return issue_repository
+
+    @app.get("/", include_in_schema=False)
+    def dashboard() -> FileResponse:
+        return FileResponse(STATIC_DIR / "index.html")
 
     @app.get("/health")
     def health_check() -> dict[str, str]:
@@ -56,6 +72,18 @@ def create_app(repository: IssueRepository | None = None) -> FastAPI:
         repository: Annotated[IssueRepository, Depends(get_repository)],
     ) -> QualitySummary:
         return repository.summary()
+
+    @app.post("/demo/seed", response_model=list[QualityIssue])
+    def seed_demo_issues(
+        repository: Annotated[IssueRepository, Depends(get_repository)],
+    ) -> list[QualityIssue]:
+        return repository.seed_demo()
+
+    @app.get("/demo/pipeline", response_model=DemoPipelineReport)
+    def demo_pipeline(
+        repository: Annotated[IssueRepository, Depends(get_repository)],
+    ) -> DemoPipelineReport:
+        return build_demo_pipeline_report(repository.summary())
 
     return app
 
